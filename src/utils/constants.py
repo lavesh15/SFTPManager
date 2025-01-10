@@ -1,0 +1,2 @@
+secret = "Secret"
+directory = "Directory"
