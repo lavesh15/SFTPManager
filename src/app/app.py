@@ -7,29 +7,22 @@ from typing import List
 from interfaces import IFileHandlerService, ISFTPService
 
 
-class SFTPFileFetcher:
-    def __init__(self, sftp_service: ISFTPService, file_handler: IFileHandlerService):
-        self.sftp_service = sftp_service
-        self.file_handler = file_handler
+def _fetch_and_filter_sftp_files(self, directory: str, condition) -> List:
+        sftp_service = SFTPService(secret)
+        file_handler = FileHandlerService(sftp_service)
 
-    def fetch_and_filter_sftp_files(self, directory: str, condition) -> List:
-        self.sftp_service.connect()
+        sftp_service.connect()
         try:
-            return self.file_handler.fetch_and_filter_files(directory, condition)
+            return file_handler.fetch_and_filter_files(directory, condition)
+        except SFTPException as e:
+            logger.error(constants.ERROR_FETCHING_FILES)
+            raise e
         finally:
-            self.sftp_service.close()
+            sftp_service.close()
 
 def fetch_and_filter_sftp_files(secret: str, directory: str, condition) -> List:
-    sftp_service = SFTPService(secret)
-    file_handler = FileHandlerService(sftp_service)
-    file_fetcher = SFTPFileFetcher(sftp_service, file_handler)
-
-    try:
-        return file_fetcher.fetch_and_filter_sftp_files(directory, condition)
-    except SFTPException as e:
-        logger.error(constants.ERROR_FETCHING_FILES)
-        raise e
-
+    return _fetch_and_filter_sftp_files(directory, condition)
+    
 def condition(file) -> bool:
     return True
 
