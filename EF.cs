@@ -64,3 +64,32 @@ public class EfCoreLearnTests
         Assert.IsNotNull(orderWithUser.User);
     }
 }
+
+public class UserRepository
+{
+    private readonly DbContext _context;
+
+    public UserRepository(DbContext context)
+    {
+        _context = context;
+    }
+
+    public async Task<User> GetUserWithOrdersAsync(int userId)
+    {
+        // Encapsulate the EF Core complexity
+        return await _context.Users
+            .Include(u => u.Orders)
+            .FirstOrDefaultAsync(u => u.Id == userId);
+    }
+
+    public async Task SaveUserAsync(User user)
+    {
+        // Handle the entity state management internally
+        if (user.Id == 0)
+            _context.Users.Add(user);
+        else
+            _context.Users.Update(user);
+            
+        await _context.SaveChangesAsync();
+    }
+}
